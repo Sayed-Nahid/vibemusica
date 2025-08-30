@@ -31,6 +31,45 @@ class _HomeViewState extends State<HomeView> {
             fit: BoxFit.contain,
           ),
         ),
+        title: Row(
+          children: [
+            Expanded(
+                child: Container(
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF292E4B),
+                    borderRadius: BorderRadius.circular(19),
+                  ),
+                  child: TextField(
+                    controller: homeVM.txtSearch.value,
+                    decoration: InputDecoration(
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
+                      prefixIcon: Container(
+                        margin: const EdgeInsets.only(left: 20),
+                        alignment: Alignment.centerLeft,
+                        width: 30,
+                        child: Image.asset(
+                          "assets/img/search.png",
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.contain,
+                          color: TColor.primaryText28,
+                        ),
+                      ),
+                      hintText: "Search Song",
+                      hintStyle: TextStyle(
+                        color: TColor.primaryText28,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                )
+            )
+          ],
+        ),
       ),
     );
   }
