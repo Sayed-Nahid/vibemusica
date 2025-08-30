@@ -12,7 +12,7 @@ class SplashView extends StatefulWidget {
 }
 
 class _SplashViewState extends State<SplashView> {
-  final splashVM = Get.put( SplashViewMode());
+  final splashVM = Get.put( SplashViewModel());
   @override
   void initState() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
