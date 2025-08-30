@@ -37,37 +37,51 @@ class _MainTabViewState extends State<MainTabView> with SingleTickerProviderStat
       body: TabBarView(
         controller: controller,
         children: [
-          Container(),
-          Container(),
-          Container(),
+          Container(child: Center(child: Text("Home"),),),
+          Container(child: Center(child: Text("Songs"),),),
+          Container(child: Center(child: Text("Settings"),),),
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
-        child: TabBar(
-          controller: controller,
-          indicatorColor: Colors.transparent,
-          indicatorWeight: 1,
-          labelColor: TColor.primary,
-          labelStyle: const TextStyle(fontSize: 10),
-          unselectedLabelColor: TColor.primaryText28,
-          unselectedLabelStyle: const TextStyle(fontSize: 10),
-          tabs: [
-            Tab(
-              text: "Home",
-              icon: Image.asset( selectTab == 0 ? "assets/img/home_tab.png" : "assets/img/home_tab_un.png", width: 25, height: 25,),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+            color: TColor.bg,
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black38,
+                blurRadius: 5,
+                offset: Offset(0, -3),
+              )
+            ]
+        ),
+        child: BottomAppBar(
+          color: Colors.transparent,
+          elevation: 0,
+          child: TabBar(
+            controller: controller,
+            indicatorColor: Colors.transparent,
+            indicatorWeight: 1,
+            labelColor: TColor.primary,
+            labelStyle: const TextStyle(fontSize: 10),
+            unselectedLabelColor: TColor.primaryText28,
+            unselectedLabelStyle: const TextStyle(fontSize: 10),
+            tabs: [
+              Tab(
+                text: "Home",
+                icon: Image.asset( selectTab == 0 ? "assets/img/home_tab.png" : "assets/img/home_tab_un.png", width: 20, height: 20,),
 
-            ),
-            Tab(
-              text: "Songs",
-              icon: Image.asset( selectTab == 0 ? "assets/img/songs_tab.png" : "assets/img/songs_tab_un.png", width: 25, height: 25,),
+              ),
+              Tab(
+                text: "Songs",
+                icon: Image.asset( selectTab == 1 ? "assets/img/songs_tab.png" : "assets/img/songs_tab_un.png", width: 20, height: 20,),
 
-            ),
-            Tab(
-              text: "Settings",
-              icon: Image.asset( selectTab == 0 ? "assets/img/setting_tab.png" : "assets/img/setting_tab_un.png", width: 25, height: 25,),
+              ),
+              Tab(
+                text: "Settings",
+                icon: Image.asset( selectTab == 2 ? "assets/img/setting_tab.png" : "assets/img/setting_tab_un.png", width: 20, height: 20,),
 
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
