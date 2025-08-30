@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:vibemusica/view_model/splash_view_model.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -9,10 +12,12 @@ class SplashView extends StatefulWidget {
 }
 
 class _SplashViewState extends State<SplashView> {
+  final splashVM = Get.put( SplashViewMode());
   @override
   void initState() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
     super.initState();
+    splashVM.loadView();
   }
 
   @override
