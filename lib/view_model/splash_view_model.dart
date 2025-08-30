@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:vibemusica/view/main_tabview/main_tabview.dart';
 
 class SplashViewMode extends GetxController{
   void loadView() async {
