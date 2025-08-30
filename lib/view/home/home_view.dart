@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:vibemusica/common_widget/recommended_cell.dart';
 import 'package:vibemusica/view_model/home_view_model.dart';
 
 import '../../common/color_extension.dart';
+import '../../common_widget/title_section.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -68,6 +70,31 @@ class _HomeViewState extends State<HomeView> {
                   ),
                 )
             )
+          ],
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const TitleSection(title: "Hot Recommended",),
+            SizedBox(
+              height: 195,
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                scrollDirection: Axis.horizontal,
+                itemCount: homeVM.hostRecommendedArr.length,
+                itemBuilder: (context, index) {
+                  var mObj = homeVM.hostRecommendedArr[index];
+                  return RecommendedCell(mObj: mObj);
+                },
+              ),
+            ),
+            Divider(
+              color: Colors.white.withOpacity(0.07),
+              indent: 20,
+              endIndent: 20,
+            ),
           ],
         ),
       ),
