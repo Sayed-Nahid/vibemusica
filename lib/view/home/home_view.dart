@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:vibemusica/common_widget/playlist_cell.dart';
 import 'package:vibemusica/common_widget/recommended_cell.dart';
+import 'package:vibemusica/common_widget/songs_row.dart';
 import 'package:vibemusica/view_model/home_view_model.dart';
 
 import '../../common/color_extension.dart';
@@ -131,8 +132,12 @@ class _HomeViewState extends State<HomeView> {
               padding: const EdgeInsets.symmetric(horizontal: 10),
               itemCount: homeVM.recentlyPlayedArr.length,
               itemBuilder: (context, index) {
-                var mObj = homeVM.playListArr[index];
-                return PlaylistCell(mObj: mObj);
+                var sObj = homeVM.recentlyPlayedArr[index];
+                return SongsRow(
+                    sObj: sObj,
+                    onPressed: () {},
+                    onPressedPlay: () {},
+                );
               },
             ),
           ],
