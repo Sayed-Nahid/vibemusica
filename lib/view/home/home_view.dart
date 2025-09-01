@@ -5,6 +5,7 @@ import 'package:vibemusica/common_widget/playlist_cell.dart';
 import 'package:vibemusica/common_widget/recommended_cell.dart';
 import 'package:vibemusica/common_widget/songs_row.dart';
 import 'package:vibemusica/view_model/home_view_model.dart';
+import 'package:vibemusica/view_model/splash_view_model.dart';
 
 import '../../common/color_extension.dart';
 import '../../common_widget/title_section.dart';
@@ -28,7 +29,9 @@ class _HomeViewState extends State<HomeView> {
         backgroundColor: TColor.bg,
         elevation: 0,
         leading: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Get.find<SplashViewModel>().openDrawer();
+          },
           icon: Image.asset(
             "assets/img/menu.png",
             width: 25,
