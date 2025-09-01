@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:vibemusica/common/color_extension.dart';
 import 'package:vibemusica/view/home/home_view.dart';
+import 'package:vibemusica/view/songs/songs_view.dart';
 
 import '../../view_model/splash_view_model.dart';
 
@@ -259,7 +260,7 @@ class _MainTabViewState extends State<MainTabView> with SingleTickerProviderStat
         controller: controller,
         children: [
           const HomeView(),
-          Container(child: Center(child: Text("Songs"),),),
+          const SongsView(),
           Container(child: Center(child: Text("Settings"),),),
         ],
       ),
