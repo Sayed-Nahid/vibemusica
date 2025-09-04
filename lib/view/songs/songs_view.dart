@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:vibemusica/view/songs/all_songs_view.dart';
+import 'package:vibemusica/view/songs/playlists_view.dart';
 
 import '../../common/color_extension.dart';
 import '../../view_model/splash_view_model.dart';
@@ -112,8 +114,8 @@ class _SongsViewState extends State<SongsView> with SingleTickerProviderStateMix
                 child: TabBarView(
                   controller: controller,
                   children: [
-                    const Center(child: Text("All Songs"),),
-                    const Center(child: Text("Playlists"),),
+                    const AllSongsView(),
+                    const PlaylistsView(),
                     const Center(child: Text("Albums"),),
                     const Center(child: Text("Artists"),),
                     const Center(child: Text("Genres"),),
