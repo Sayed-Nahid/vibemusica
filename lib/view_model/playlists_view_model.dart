@@ -1,26 +1,26 @@
 import 'package:get/get.dart';
 
 class PlaylistsViewModel extends GetxController {
-  final paylistArr = [
+  final playlistArr = [
     {
       "image": "assets/img/playlist_1.png",
       "name": "My Top Tracks",
-      "song": "100 Songs"
+      "songs": "100 Songs"
     },
     {
       "image": "assets/img/playlist_2.png",
       "name": "Latest Added",
-      "song": "323 Songs"
+      "songs": "323 Songs"
     },
     {
       "image": "assets/img/playlist_3.png",
       "name": "History",
-      "song": "450 Songs"
+      "songs": "450 Songs"
     },
     {
       "image": "assets/img/playlist_4.png",
       "name": "Favorites",
-      "song": "966 Songs"
+      "songs": "966 Songs"
     },
   ].obs;
 
