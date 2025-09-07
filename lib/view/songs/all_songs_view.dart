@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:vibemusica/common_widget/all_song_row.dart';
 
 import '../../view_model/all_songs_view_model.dart';
 
@@ -19,10 +20,11 @@ class _AllSongsViewState extends State<AllSongsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() => ListView.builder(
+        padding: const EdgeInsets.all(20),
         itemCount: allVM.allList.length,
         itemBuilder: (context, index) {
           var sObj = allVM.allList[index];
-          return;
+          return AllSongRow(sObj: sObj, onPressed: () {}, onPressedPlay: () {});
         },
       )),
     );
