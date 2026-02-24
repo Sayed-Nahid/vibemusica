@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 class MainPlayerViewModel extends GetxController {
@@ -56,7 +57,9 @@ class MainPlayerViewModel extends GetxController {
             album: song.album ?? "Unknown Album",
             title: song.title,
             artist: song.artist ?? "Unknown Artist",
-            artUri: null, // Artwork to be handled by on_audio_query widget
+            artUri: Uri.parse(
+              "content://media/external/audio/albumart/${song.albumId}",
+            ),
           ),
         ),
       );
@@ -108,19 +111,3 @@ class MainPlayerViewModel extends GetxController {
   }
 }
 
-// MediaItem class to mimic audio_service's MediaItem for tag
-class MediaItem {
-  final String id;
-  final String title;
-  final String artist;
-  final String? album;
-  final Uri? artUri;
-  
-  MediaItem({
-    required this.id, 
-    required this.title, 
-    required this.artist,
-    this.album,
-    this.artUri,
-  });
-}
