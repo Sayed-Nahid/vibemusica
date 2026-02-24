@@ -3,9 +3,10 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:vibemusica/common/color_extension.dart';
 import 'package:vibemusica/view/home/home_view.dart';
+import 'package:vibemusica/view/player/mini_player_view.dart';
 import 'package:vibemusica/view/settings/settings_view.dart';
 import 'package:vibemusica/view/songs/songs_view.dart';
-
+import 'package:vibemusica/view_model/main_player_view_model.dart';
 import '../../common_widget/icon_text_row.dart';
 import '../../view_model/splash_view_model.dart';
 
@@ -20,6 +21,7 @@ class _MainTabViewState extends State<MainTabView> with SingleTickerProviderStat
 
   TabController? controller;
   int selectTab = 0;
+  final playerVM = Get.put(MainPlayerViewModel());
 
   @override
   void initState() {
@@ -148,12 +150,26 @@ class _MainTabViewState extends State<MainTabView> with SingleTickerProviderStat
           ],
         ),
       ),
-      body: TabBarView(
-        controller: controller,
-        children: const [
-          HomeView(),
-          SongsView(),
-          SettingsView(),
+      body: Column(
+        children: [
+          Expanded(
+            child: TabBarView(
+              controller: controller,
+              children: const [
+                HomeView(),
+                SongsView(),
+                SettingsView(),
+              ],
+            ),
+          ),
+           Obx(
+            () {
+              if (playerVM.currentSongTitle.isNotEmpty) {
+                return const MiniPlayerView();
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ],
       ),
       bottomNavigationBar: Container(
