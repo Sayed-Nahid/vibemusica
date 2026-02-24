@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 import '../common/color_extension.dart';
 
 
 class AllSongRow extends StatelessWidget {
-  final Map sObj;
+  final SongModel sObj;
   final VoidCallback onPressedPlay;
   final VoidCallback onPressed;
   const AllSongRow({
@@ -26,11 +27,18 @@ class AllSongRow extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(25),
-                  child: Image.asset(
-                    sObj["image"],
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
+                  child: QueryArtworkWidget(
+                    id: sObj.id,
+                    type: ArtworkType.AUDIO,
+                    nullArtworkWidget: Image.asset(
+                      "assets/img/app_logo.png",
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    ),
+                    artworkWidth: 50,
+                    artworkHeight: 50,
+                    artworkFit: BoxFit.cover,
                   ),
                 ),
                 Container(
@@ -57,7 +65,7 @@ class AllSongRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    sObj["name"],
+                    sObj.title,
                     maxLines: 1,
                     style: TextStyle(
                         color: TColor.primaryText60,
@@ -66,7 +74,7 @@ class AllSongRow extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    sObj["artists"],
+                    sObj.artist ?? "Unknown Artist",
                     maxLines: 1,
                     style: TextStyle(
                       color: TColor.primaryText28,
