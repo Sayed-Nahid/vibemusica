@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -49,42 +48,36 @@ class ViewAllSection extends StatelessWidget {
               ],
             ),
           ),
-          // Glass pill button
+          // Glass pill button (no BackdropFilter for perf)
           GestureDetector(
             onTap: () {
               HapticFeedback.lightImpact();
               onPressed();
             },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 6,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 6,
+              ),
+              decoration: TColor.glassDecoration(borderRadius: 20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    buttonTitle,
+                    style: TextStyle(
+                      color: TColor.org,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  decoration: TColor.glassDecoration(borderRadius: 20),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        buttonTitle,
-                        style: TextStyle(
-                          color: TColor.org,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: 16,
-                        color: TColor.org,
-                      ),
-                    ],
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 16,
+                    color: TColor.org,
                   ),
-                ),
+                ],
               ),
             ),
           ),
