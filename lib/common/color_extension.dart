@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class TColor {
@@ -25,6 +26,30 @@ class TColor {
   static Color get bg => const Color(0xff181B2C);
   static Color get darkGray => const Color(0xff383B49);
   static Color get lightGray => const Color(0xffD0D1D4);
+
+  // --- Glassmorphism tokens ---
+  static Color get glassFill => Colors.white.withOpacity(0.08);
+  static Color get glassBorder => Colors.white.withOpacity(0.15);
+  static Color get glassHighlight => Colors.white.withOpacity(0.25);
+  static double get glassBlurSigma => 12.0;
+
+  // Gradient mesh blob colors
+  static Color get meshCoral => const Color(0xffED8770);
+  static Color get meshPurple => const Color(0xffC35BD1);
+  static Color get meshBlue => const Color(0xff657DDF);
+  static Color get meshTeal => const Color(0xff4FD1C5);
+
+  /// Standard glass card decoration — frosted translucent card
+  static BoxDecoration glassDecoration({
+    double borderRadius = 16,
+    Color? fill,
+    Color? border,
+  }) =>
+      BoxDecoration(
+        color: fill ?? glassFill,
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(color: border ?? glassBorder, width: 0.8),
+      );
 }
 
 extension HexColor on Color {

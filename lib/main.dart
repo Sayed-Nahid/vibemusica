@@ -25,7 +25,6 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -38,8 +37,18 @@ class MyApp extends StatelessWidget {
           bodyColor: TColor.primaryText,
           displayColor: TColor.primaryText,
         ),
-        colorScheme: ColorScheme.fromSeed(seedColor: TColor.primary),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: TColor.primary,
+          brightness: Brightness.dark,
+        ),
         useMaterial3: false,
+        splashColor: Colors.white10,
+        highlightColor: Colors.white10,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+        ),
       ),
       home: const SplashView(),
     );

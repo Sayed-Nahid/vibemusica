@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -172,20 +173,22 @@ class _MainTabViewState extends State<MainTabView> with SingleTickerProviderStat
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-            color: TColor.bg,
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black38,
-                blurRadius: 5,
-                offset: Offset(0, -3),
-              )
-            ]
-        ),
-        child: BottomAppBar(
-          color: Colors.transparent,
-          elevation: 0,
+      bottomNavigationBar: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            decoration: BoxDecoration(
+              color: TColor.bg.withOpacity(0.7),
+              border: Border(
+                top: BorderSide(
+                  color: TColor.glassBorder,
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: BottomAppBar(
+              color: Colors.transparent,
+              elevation: 0,
           child: TabBar(
             controller: controller,
             indicatorColor: Colors.transparent,
@@ -211,6 +214,8 @@ class _MainTabViewState extends State<MainTabView> with SingleTickerProviderStat
 
               ),
             ],
+          ),
+        ),
           ),
         ),
       ),

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -23,86 +24,97 @@ class _MiniPlayerViewState extends State<MiniPlayerView> {
       onTap: () {
         Get.to(() => const MainPlayerView());
       },
-      child: Container(
-        height: 60,
-        width: media.width,
-        decoration: BoxDecoration(color: const Color(0xff22283A), boxShadow: const [
-          BoxShadow(
-              color: Colors.black26, blurRadius: 4, offset: Offset(0, -2))
-        ]),
-        child: Row(
-          children: [
-            Obx(
-              () => Container(
-                width: 60,
-                height: 60,
-                padding: const EdgeInsets.all(5),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(25),
-                  child: QueryArtworkWidget(
-                    id: playerVM.currentSongId.value,
-                    type: ArtworkType.AUDIO,
-                    artworkWidth: 50,
-                    artworkHeight: 50,
-                    artworkFit: BoxFit.cover,
-                    nullArtworkWidget: Image.asset(
-                      "assets/img/app_logo.png",
-                      height: 50,
-                      width: 50,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: Container(
+            height: 64,
+            width: media.width,
+            decoration: BoxDecoration(
+              color: TColor.glassFill,
+              border: Border(
+                top: BorderSide(
+                  color: TColor.glassBorder,
+                  width: 0.6,
                 ),
               ),
             ),
-            const SizedBox(
-              width: 10,
-            ),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                   Obx(
-                    () => Text(
-                      playerVM.currentSongTitle.value,
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: TColor.primaryText,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+            child: Row(
+              children: [
+                Obx(
+                  () => Container(
+                    width: 60,
+                    height: 60,
+                    padding: const EdgeInsets.all(5),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: QueryArtworkWidget(
+                        id: playerVM.currentSongId.value,
+                        type: ArtworkType.AUDIO,
+                        artworkWidth: 50,
+                        artworkHeight: 50,
+                        artworkFit: BoxFit.cover,
+                        nullArtworkWidget: Image.asset(
+                          "assets/img/app_logo.png",
+                          height: 50,
+                          width: 50,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
-                   Obx(
-                    () => Text(
-                      playerVM.currentSongArtist.value,
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: TColor.primaryText.withOpacity(0.5),
-                        fontSize: 10,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Obx(
-              () => IconButton(
-                onPressed: () {
-                  if (playerVM.isPlaying.value) {
-                    playerVM.pauseSong();
-                  } else {
-                    playerVM.resumeSong();
-                  }
-                },
-                icon: Icon(
-                  playerVM.isPlaying.value ? Icons.pause : Icons.play_arrow,
-                  color: TColor.primaryText,
                 ),
-              ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Obx(
+                        () => Text(
+                          playerVM.currentSongTitle.value,
+                          maxLines: 1,
+                          style: TextStyle(
+                            color: TColor.primaryText,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Obx(
+                        () => Text(
+                          playerVM.currentSongArtist.value,
+                          maxLines: 1,
+                          style: TextStyle(
+                            color: TColor.primaryText35,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Obx(
+                  () => IconButton(
+                    onPressed: () {
+                      if (playerVM.isPlaying.value) {
+                        playerVM.pauseSong();
+                      } else {
+                        playerVM.resumeSong();
+                      }
+                    },
+                    icon: Icon(
+                      playerVM.isPlaying.value
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
+                      color: TColor.primaryText,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
