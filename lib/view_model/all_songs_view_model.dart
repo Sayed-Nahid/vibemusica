@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:vibemusica/view_model/splash_view_model.dart';
 
 class AllSongsViewModel extends GetxController {
 
@@ -9,7 +10,14 @@ class AllSongsViewModel extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    requestPermission();
+    // Use cached songs from splash if available, otherwise fetch fresh
+    if (SplashViewModel.cachedSongs != null &&
+        SplashViewModel.cachedSongs!.isNotEmpty) {
+      allList.value = SplashViewModel.cachedSongs!;
+      SplashViewModel.cachedSongs = null; // free memory
+    } else {
+      requestPermission();
+    }
   }
 
   void requestPermission() async {
