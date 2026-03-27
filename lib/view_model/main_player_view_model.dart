@@ -14,6 +14,10 @@ class MainPlayerViewModel extends GetxController {
   
   // List of all songs passed from the previous screen
   List<SongModel> allSongs = [];
+  // Current playlist state to sync with AudioSource
+  List<SongModel> currentPlaylist = [];
+  ConcatenatingAudioSource? playlist;
+  
   // Index of the currently playing song
   int currentIndex = 0;
 
@@ -21,12 +25,24 @@ class MainPlayerViewModel extends GetxController {
   void onInit() {
     super.onInit();
     
+    // Natively loop the playlist
+    audioPlayer.setLoopMode(LoopMode.all);
+
+    // Keep UI synced with the native player's index 
+    // This allows next/prev buttons on lock screen to update the UI
+    audioPlayer.currentIndexStream.listen((index) {
+      if (index != null && index >= 0 && index < allSongs.length) {
+        currentIndex = index;
+        final song = allSongs[index];
+        currentSongTitle.value = song.title;
+        currentSongArtist.value = song.artist ?? "Unknown Artist";
+        currentSongId.value = song.id;
+      }
+    });
+
     // Listen to player state changes
     audioPlayer.playerStateStream.listen((state) {
       isPlaying.value = state.playing;
-      if (state.processingState == ProcessingState.completed) {
-        nextSong();
-      }
     });
 
     // Listen to position changes
@@ -42,27 +58,38 @@ class MainPlayerViewModel extends GetxController {
     });
   }
 
-  void playSong(SongModel song, int index) {
+  void playSong(SongModel song, int index) async {
     currentIndex = index;
     currentSongTitle.value = song.title;
     currentSongArtist.value = song.artist ?? "Unknown Artist";
     currentSongId.value = song.id;
     
     try {
-      audioPlayer.setAudioSource(
-        AudioSource.uri(
-          Uri.parse(song.uri!),
-          tag: MediaItem(
-            id: song.id.toString(),
-            album: song.album ?? "Unknown Album",
-            title: song.title,
-            artist: song.artist ?? "Unknown Artist",
-            artUri: Uri.parse(
-              "content://media/external/audio/albumart/${song.albumId}",
+      bool isSamePlaylist = playlist != null &&
+          currentPlaylist.length == allSongs.length &&
+          (allSongs.isNotEmpty && currentPlaylist.isNotEmpty && currentPlaylist.first.id == allSongs.first.id);
+
+      if (!isSamePlaylist) {
+        currentPlaylist = List.from(allSongs);
+        playlist = ConcatenatingAudioSource(
+          children: allSongs.map((s) => AudioSource.uri(
+            Uri.parse(s.uri!),
+            tag: MediaItem(
+              id: s.id.toString(),
+              album: s.album ?? "Unknown Album",
+              title: s.title,
+              artist: s.artist ?? "Unknown Artist",
+              artUri: Uri.parse(
+                "content://media/external/audio/albumart/${s.albumId}",
+              ),
             ),
-          ),
-        ),
-      );
+          )).toList(),
+        );
+        await audioPlayer.setAudioSource(playlist!, initialIndex: index, initialPosition: Duration.zero);
+      } else {
+        await audioPlayer.seek(Duration.zero, index: index);
+      }
+      
       audioPlayer.play();
       isPlaying.value = true;
     } catch (e) {
@@ -79,25 +106,15 @@ class MainPlayerViewModel extends GetxController {
   }
 
   void nextSong() {
-    if (// Check if there are more songs
-        currentIndex < allSongs.length - 1) {
-      currentIndex++;
-      playSong(allSongs[currentIndex], currentIndex);
+    if (audioPlayer.hasNext) {
+      audioPlayer.seekToNext();
     } else {
-      // Loop back to the first song if needed, or stop
-      // For now, let's stop or loop
-      currentIndex = 0;
-      playSong(allSongs[currentIndex], currentIndex);
+      audioPlayer.seek(Duration.zero, index: 0);
     }
   }
 
   void previousSong() {
-    if (audioPlayer.position.inSeconds > 5) {
-      audioPlayer.seek(Duration.zero);
-    } else if (currentIndex > 0) {
-      currentIndex--;
-      playSong(allSongs[currentIndex], currentIndex);
-    }
+    audioPlayer.seekToPrevious();
   }
   
   void seekTo(Duration position) {
