@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vibemusica/common_widget/folder_cell.dart';
 import 'package:vibemusica/common_widget/my_playlist_cell.dart';
 import 'package:vibemusica/common_widget/playlist_songs_cell.dart';
 import 'package:vibemusica/common_widget/view_all_section.dart';
+import 'package:vibemusica/view/songs/folder_songs_view.dart';
+import 'package:vibemusica/view_model/folders_view_model.dart';
 import 'package:vibemusica/view_model/playlists_view_model.dart';
 
 import '../../common/color_extension.dart';
@@ -16,6 +19,7 @@ class PlaylistsView extends StatefulWidget {
 
 class _PlaylistsViewState extends State<PlaylistsView> {
   final plVM = Get.put(PlaylistsViewModel());
+  final foldersVM = Get.put(FoldersViewModel());
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +77,54 @@ class _PlaylistsViewState extends State<PlaylistsView> {
                 },
               )),
             ),
+
+            // ── Folders Section ──
+            ViewAllSection(title: "Folders", onPressed: () {}),
+            Obx(() {
+              if (foldersVM.isLoading.value) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 30),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: TColor.focus,
+                      strokeWidth: 2,
+                    ),
+                  ),
+                );
+              }
+
+              if (foldersVM.folders.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                  child: Center(
+                    child: Text(
+                      "No folders found",
+                      style: TextStyle(
+                        color: TColor.primaryText35,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                padding: const EdgeInsets.only(bottom: 80),
+                itemCount: foldersVM.folders.length,
+                itemBuilder: (context, index) {
+                  final folder = foldersVM.folders[index];
+                  return FolderCell(
+                    folder: folder,
+                    index: index,
+                    onPressed: () {
+                      Get.to(() => FolderSongsView(folder: folder));
+                    },
+                  );
+                },
+              );
+            }),
           ],
         ),
       ),
