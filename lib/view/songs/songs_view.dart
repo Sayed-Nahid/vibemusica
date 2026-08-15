@@ -21,6 +21,9 @@ class _SongsViewState extends State<SongsView>
     with SingleTickerProviderStateMixin {
   TabController? controller;
   int selectTab = 0;
+  bool _isSearching = false;
+  final TextEditingController _txtSearch = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -30,6 +33,14 @@ class _SongsViewState extends State<SongsView>
       selectTab = controller?.index ?? 0;
       setState(() {});
     });
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    _txtSearch.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -58,38 +69,70 @@ class _SongsViewState extends State<SongsView>
                             height: kToolbarHeight,
                             child: Row(
                               children: [
-                                IconButton(
-                                  onPressed: () {
-                                    HapticFeedback.lightImpact();
-                                    Get.find<SplashViewModel>().openDrawer();
-                                  },
-                                  icon: Image.asset(
-                                    "assets/img/menu.png",
-                                    width: 25,
-                                    height: 25,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Center(
-                                    child: Text(
-                                      "Songs",
-                                      style: TextStyle(
-                                        color: TColor.primaryText,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
+                                _isSearching
+                                    ? IconButton(
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          setState(() {
+                                            _isSearching = false;
+                                            _txtSearch.clear();
+                                          });
+                                        },
+                                        icon: Icon(
+                                          Icons.arrow_back_ios_new_rounded,
+                                          color: TColor.primaryText,
+                                          size: 20,
+                                        ),
+                                      )
+                                    : IconButton(
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          Get.find<SplashViewModel>().openDrawer();
+                                        },
+                                        icon: Image.asset(
+                                          "assets/img/menu.png",
+                                          width: 25,
+                                          height: 25,
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
+                                Expanded(
+                                  child: _isSearching
+                                      ? _buildActiveSearchBar()
+                                      : Center(
+                                          child: _buildTitle(),
+                                        ),
+                                ),
+                                if (!_isSearching)
+                                  IconButton(
+                                    onPressed: () {
+                                      HapticFeedback.lightImpact();
+                                      setState(() {
+                                        _isSearching = true;
+                                      });
+                                      _searchFocusNode.requestFocus();
+                                    },
+                                    icon: Icon(
+                                      Icons.search_rounded,
+                                      color: TColor.primaryText80,
+                                      size: 24,
                                     ),
                                   ),
-                                ),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(
-                                    Icons.search_rounded,
-                                    color: TColor.primaryText35,
-                                    size: 22,
+                                if (_isSearching && _txtSearch.text.isNotEmpty)
+                                  IconButton(
+                                    onPressed: () {
+                                      HapticFeedback.lightImpact();
+                                      setState(() {
+                                        _txtSearch.clear();
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.close_rounded,
+                                      color: TColor.primaryText60,
+                                      size: 20,
+                                    ),
                                   ),
-                                ),
+                                const SizedBox(width: 4),
                               ],
                             ),
                           ),
@@ -160,5 +203,92 @@ class _SongsViewState extends State<SongsView>
         ],
       ),
     );
+  }
+
+  /// Centered title "Songs"
+  Widget _buildTitle() {
+    return ShaderMask(
+      shaderCallback: (bounds) => LinearGradient(
+        colors: TColor.primaryG,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(bounds),
+      child: Text(
+        "Songs",
+        style: TextStyle(
+          fontFamily: "Circular Std",
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: TColor.primaryText,
+          letterSpacing: 0.8,
+        ),
+      ),
+    )
+        .animate()
+        .fadeIn(duration: 300.ms)
+        .scale(
+          begin: const Offset(0.95, 0.95),
+          end: const Offset(1.0, 1.0),
+          duration: 300.ms,
+          curve: Curves.easeOutBack,
+        );
+  }
+
+  /// Frosted-glass search bar when search is active
+  Widget _buildActiveSearchBar() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          height: 38,
+          decoration: TColor.glassDecoration(borderRadius: 20),
+          child: TextField(
+            controller: _txtSearch,
+            focusNode: _searchFocusNode,
+            autofocus: true,
+            onChanged: (val) {
+              setState(() {});
+            },
+            style: TextStyle(
+              color: TColor.primaryText,
+              fontSize: 13,
+            ),
+            decoration: InputDecoration(
+              isDense: true,
+              focusedBorder: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 10,
+                horizontal: 16,
+              ),
+              prefixIcon: Container(
+                margin: const EdgeInsets.only(left: 12, right: 8),
+                alignment: Alignment.centerLeft,
+                width: 20,
+                child: Icon(
+                  Icons.search_rounded,
+                  size: 18,
+                  color: TColor.focus,
+                ),
+              ),
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 36,
+                minHeight: 20,
+              ),
+              hintText: "Search Songs, Playlists...",
+              hintStyle: TextStyle(
+                color: TColor.primaryText28,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ),
+      ),
+    )
+        .animate()
+        .fadeIn(duration: 250.ms)
+        .slideX(begin: 0.05, end: 0, duration: 250.ms, curve: Curves.easeOut);
   }
 }
