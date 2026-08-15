@@ -8,6 +8,7 @@ import 'package:vibemusica/view/home/home_view.dart';
 import 'package:vibemusica/view/player/mini_player_view.dart';
 import 'package:vibemusica/view/settings/settings_view.dart';
 import 'package:vibemusica/view/songs/songs_view.dart';
+import 'package:vibemusica/view_model/home_view_model.dart';
 import 'package:vibemusica/view_model/main_player_view_model.dart';
 import '../../common_widget/icon_text_row.dart';
 import '../../view_model/splash_view_model.dart';
@@ -164,7 +165,15 @@ class _MainTabViewState extends State<MainTabView>
             child: PageView(
               controller: _pageController,
               physics: const BouncingScrollPhysics(),
-              onPageChanged: (i) => setState(() => _currentIndex = i),
+              onPageChanged: (i) {
+                setState(() => _currentIndex = i);
+                // Refresh recently-played when returning to Home tab
+                if (i == 0) {
+                  try {
+                    Get.find<HomeViewModel>().loadRecentlyPlayed();
+                  } catch (_) {}
+                }
+              },
               children: const [
                 HomeView(),
                 SongsView(),

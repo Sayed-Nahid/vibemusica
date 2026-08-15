@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:vibemusica/common_widget/all_song_row.dart';
 import 'package:vibemusica/common_widget/gradient_mesh_background.dart';
 import 'package:vibemusica/common_widget/playlist_cell.dart';
 import 'package:vibemusica/common_widget/recommended_cell.dart';
-import 'package:vibemusica/common_widget/songs_row.dart';
+import 'package:vibemusica/view/home/recently_played_view.dart';
+import 'package:vibemusica/view/player/main_player_view.dart';
 import 'package:vibemusica/view_model/home_view_model.dart';
+import 'package:vibemusica/view_model/main_player_view_model.dart';
 import 'package:vibemusica/view_model/splash_view_model.dart';
 
 import '../../common/color_extension.dart';
@@ -23,6 +26,7 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final homeVM = Get.put(HomeViewModel());
+  final playerVM = Get.find<MainPlayerViewModel>();
   bool _isSearching = false;
   final FocusNode _searchFocusNode = FocusNode();
 
@@ -175,29 +179,88 @@ class _HomeViewState extends State<HomeView> {
               SliverToBoxAdapter(
                 child: ViewAllSection(
                   title: "Recently Played",
-                  onPressed: () {},
+                  onPressed: () {
+                    Get.to(() => const RecentlyPlayedView());
+                  },
                 ),
               ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      var sObj = homeVM.recentlyPlayedArr[index];
-                      return SongsRow(
-                        sObj: sObj,
-                        onPressed: () {},
-                        onPressedPlay: () {},
-                        index: index,
-                      );
-                    },
-                    childCount: homeVM.recentlyPlayedArr.length,
+              Obx(() {
+                if (homeVM.isLoadingRecent.value) {
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: TColor.focus,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                if (homeVM.recentlyPlayedSongs.isEmpty) {
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 30,
+                        horizontal: 20,
+                      ),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.history_rounded,
+                              size: 36,
+                              color: TColor.primaryText28,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "Play some music to see\nyour history here",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: TColor.primaryText35,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                // Show last 5 recently played songs
+                final songs = homeVM.recentlyPlayedSongs.take(5).toList();
+                return SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
                   ),
-                ),
-              ),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final song = songs[index];
+                        return AllSongRow(
+                          sObj: song,
+                          index: index,
+                          onPressed: () {
+                            playerVM.allSongs = songs;
+                            playerVM.playSong(song, index);
+                            Get.to(() => const MainPlayerView());
+                          },
+                          onPressedPlay: () {
+                            playerVM.allSongs = songs;
+                            playerVM.playSong(song, index);
+                            Get.to(() => const MainPlayerView());
+                          },
+                        );
+                      },
+                      childCount: songs.length,
+                    ),
+                  ),
+                );
+              }),
 
               // Bottom safe-area padding
               const SliverToBoxAdapter(child: SizedBox(height: 80)),

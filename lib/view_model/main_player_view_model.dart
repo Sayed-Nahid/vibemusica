@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:vibemusica/common/recently_played_service.dart';
+import 'package:vibemusica/view_model/home_view_model.dart';
 
 class MainPlayerViewModel extends GetxController {
   final AudioPlayer audioPlayer = AudioPlayer();
@@ -37,6 +39,9 @@ class MainPlayerViewModel extends GetxController {
         currentSongTitle.value = song.title;
         currentSongArtist.value = song.artist ?? "Unknown Artist";
         currentSongId.value = song.id;
+
+        // Record and instantly refresh the home screen list
+        _recordRecentlyPlayed(song.id);
       }
     });
 
@@ -63,6 +68,9 @@ class MainPlayerViewModel extends GetxController {
     currentSongTitle.value = song.title;
     currentSongArtist.value = song.artist ?? "Unknown Artist";
     currentSongId.value = song.id;
+
+    // Persist and instantly refresh the home screen list
+    _recordRecentlyPlayed(song.id);
     
     try {
       bool isSamePlaylist = playlist != null &&
@@ -121,10 +129,19 @@ class MainPlayerViewModel extends GetxController {
     audioPlayer.seek(position);
   }
 
+  /// Persists the song ID to history and immediately refreshes HomeViewModel.
+  void _recordRecentlyPlayed(int songId) async {
+    await RecentlyPlayedService.addSong(songId);
+    try {
+      Get.find<HomeViewModel>().loadRecentlyPlayed();
+    } catch (_) {
+      // HomeViewModel may not be registered yet (e.g. first launch)
+    }
+  }
+
   @override
   void onClose() {
     audioPlayer.dispose();
     super.onClose();
   }
 }
-
