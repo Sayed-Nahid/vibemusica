@@ -34,10 +34,7 @@ class _MiniPlayerViewState extends State<MiniPlayerView> {
             decoration: BoxDecoration(
               color: TColor.glassFill,
               border: Border(
-                top: BorderSide(
-                  color: TColor.glassBorder,
-                  width: 0.6,
-                ),
+                top: BorderSide(color: TColor.glassBorder, width: 0.6),
               ),
             ),
             child: Row(
@@ -49,19 +46,29 @@ class _MiniPlayerViewState extends State<MiniPlayerView> {
                     padding: const EdgeInsets.all(5),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(14),
-                      child: QueryArtworkWidget(
-                        id: playerVM.currentSongId.value,
-                        type: ArtworkType.AUDIO,
-                        artworkWidth: 50,
-                        artworkHeight: 50,
-                        artworkFit: BoxFit.cover,
-                        nullArtworkWidget: Image.asset(
-                          "assets/img/app_logo.png",
-                          height: 50,
-                          width: 50,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                      child: playerVM.youtubeArtwork.value.isNotEmpty
+                          ? Image.network(
+                              playerVM.youtubeArtwork.value,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, error, stack) => const Icon(
+                                Icons.music_note,
+                                color: Colors.white,
+                                size: 40,
+                              ),
+                            )
+                          : QueryArtworkWidget(
+                              id: playerVM.currentSongId.value,
+                              type: ArtworkType.AUDIO,
+                              artworkWidth: 50,
+                              artworkHeight: 50,
+                              artworkFit: BoxFit.cover,
+                              nullArtworkWidget: Image.asset(
+                                "assets/img/app_logo.png",
+                                height: 50,
+                                width: 50,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                     ),
                   ),
                 ),

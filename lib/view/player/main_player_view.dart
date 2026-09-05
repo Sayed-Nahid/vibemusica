@@ -35,53 +35,58 @@ class _MainPlayerViewState extends State<MainPlayerView> {
               children: [
                 // ── Glass AppBar ──
                 ClipRRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                    child: Container(
-                      height: kToolbarHeight,
-                      color: TColor.glassFill,
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                              Get.back();
-                            },
-                            icon: const Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          ),
-                          Expanded(
-                            child: Center(
-                              child: Text(
-                                "Now Playing",
-                                style: TextStyle(
-                                  color: TColor.primaryText,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                        child: Container(
+                          height: kToolbarHeight,
+                          color: TColor.glassFill,
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Row(
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  Get.back();
+                                },
+                                icon: const Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: Colors.white,
+                                  size: 30,
                                 ),
                               ),
-                            ),
+                              Expanded(
+                                child: Center(
+                                  child: Text(
+                                    "Now Playing",
+                                    style: TextStyle(
+                                      color: TColor.primaryText,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () {},
+                                icon: Icon(
+                                  Icons.more_horiz_rounded,
+                                  color: TColor.primaryText35,
+                                  size: 24,
+                                ),
+                              ),
+                            ],
                           ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: Icon(
-                              Icons.more_horiz_rounded,
-                              color: TColor.primaryText35,
-                              size: 24,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                )
+                    )
                     .animate()
                     .fadeIn(duration: 400.ms)
-                    .slideY(begin: -0.08, end: 0, duration: 400.ms, curve: Curves.easeOut),
+                    .slideY(
+                      begin: -0.08,
+                      end: 0,
+                      duration: 400.ms,
+                      curve: Curves.easeOut,
+                    ),
 
                 // ── Scrollable body ──
                 Expanded(
@@ -93,57 +98,74 @@ class _MainPlayerViewState extends State<MainPlayerView> {
 
                         // ── Album art with glow ──
                         Obx(
-                          () => Container(
-                            width: media.width * 0.72,
-                            height: media.width * 0.72,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: TColor.primary.withOpacity(0.3),
-                                  blurRadius: 40,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 10),
-                                ),
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.4),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(24),
-                              child: QueryArtworkWidget(
-                                id: playerVM.currentSongId.value,
-                                type: ArtworkType.AUDIO,
-                                artworkWidth: media.width * 0.72,
-                                artworkHeight: media.width * 0.72,
-                                artworkFit: BoxFit.cover,
-                                nullArtworkWidget: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(24),
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        TColor.meshPurple.withOpacity(0.4),
-                                        TColor.meshBlue.withOpacity(0.4),
-                                      ],
+                              () => Container(
+                                width: media.width * 0.72,
+                                height: media.width * 0.72,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(24),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: TColor.primary.withOpacity(0.3),
+                                      blurRadius: 40,
+                                      spreadRadius: 2,
+                                      offset: const Offset(0, 10),
                                     ),
-                                  ),
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.music_note_rounded,
-                                      size: 80,
-                                      color: TColor.primaryText35,
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.4),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
                                     ),
-                                  ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(24),
+                                  child:
+                                      playerVM.youtubeArtwork.value.isNotEmpty
+                                      ? Image.network(
+                                          playerVM.youtubeArtwork.value,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, error, stack) =>
+                                              const Icon(
+                                                Icons.music_note,
+                                                color: Colors.white,
+                                                size: 40,
+                                              ),
+                                        )
+                                      : QueryArtworkWidget(
+                                          id: playerVM.currentSongId.value,
+                                          type: ArtworkType.AUDIO,
+                                          artworkWidth: media.width * 0.72,
+                                          artworkHeight: media.width * 0.72,
+                                          artworkFit: BoxFit.cover,
+                                          nullArtworkWidget: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                                colors: [
+                                                  TColor.meshPurple.withOpacity(
+                                                    0.4,
+                                                  ),
+                                                  TColor.meshBlue.withOpacity(
+                                                    0.4,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.music_note_rounded,
+                                                size: 80,
+                                                color: TColor.primaryText35,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                 ),
                               ),
-                            ),
-                          ),
-                        )
+                            )
                             .animate()
                             .fadeIn(duration: 500.ms, delay: 100.ms)
                             .scale(
@@ -154,46 +176,74 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                               curve: Curves.easeOut,
                             ),
 
+                        Obx(
+                          () => playerVM.isLoading.value
+                              ? const Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: CircularProgressIndicator(),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                        Obx(
+                          () => playerVM.playbackError.value.isEmpty
+                              ? const SizedBox.shrink()
+                              : Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Text(
+                                    playerVM.playbackError.value,
+                                    style: const TextStyle(color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                        ),
                         const SizedBox(height: 32),
 
                         // ── Song info ──
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: Column(
-                            children: [
-                              Obx(
-                                () => Text(
-                                  playerVM.currentSongTitle.value,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: TColor.primaryText,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.3,
-                                  ),
-                                ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 32,
                               ),
-                              const SizedBox(height: 6),
-                              Obx(
-                                () => Text(
-                                  playerVM.currentSongArtist.value,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: TColor.primaryText35,
-                                    fontSize: 14,
+                              child: Column(
+                                children: [
+                                  Obx(
+                                    () => Text(
+                                      playerVM.currentSongTitle.value,
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: TColor.primaryText,
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.3,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(height: 6),
+                                  Obx(
+                                    () => Text(
+                                      playerVM.currentSongArtist.value,
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: TColor.primaryText35,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        )
+                            )
                             .animate()
                             .fadeIn(duration: 400.ms, delay: 200.ms)
-                            .slideY(begin: 0.06, end: 0, duration: 400.ms, delay: 200.ms, curve: Curves.easeOut),
+                            .slideY(
+                              begin: 0.06,
+                              end: 0,
+                              duration: 400.ms,
+                              delay: 200.ms,
+                              curve: Curves.easeOut,
+                            ),
 
                         const SizedBox(height: 36),
 
@@ -215,25 +265,40 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                                     activeTrackColor: TColor.focus,
                                     inactiveTrackColor: TColor.glassBorder,
                                     thumbColor: TColor.focus,
-                                    overlayColor: TColor.focus.withOpacity(0.15),
+                                    overlayColor: TColor.focus.withOpacity(
+                                      0.15,
+                                    ),
                                   ),
                                   child: Slider(
-                                    value: playerVM.position.value.inSeconds.toDouble() <=
-                                            playerVM.duration.value.inSeconds.toDouble()
-                                        ? playerVM.position.value.inSeconds.toDouble()
+                                    value:
+                                        playerVM.position.value.inSeconds
+                                                .toDouble() <=
+                                            playerVM.duration.value.inSeconds
+                                                .toDouble()
+                                        ? playerVM.position.value.inSeconds
+                                              .toDouble()
                                         : 0.0,
-                                    max: playerVM.duration.value.inSeconds.toDouble() > 0
-                                        ? playerVM.duration.value.inSeconds.toDouble()
+                                    max:
+                                        playerVM.duration.value.inSeconds
+                                                .toDouble() >
+                                            0
+                                        ? playerVM.duration.value.inSeconds
+                                              .toDouble()
                                         : 1.0,
                                     onChanged: (value) {
-                                      playerVM.seekTo(Duration(seconds: value.toInt()));
+                                      playerVM.seekTo(
+                                        Duration(seconds: value.toInt()),
+                                      );
                                     },
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         formatDuration(playerVM.position.value),
@@ -257,98 +322,104 @@ class _MainPlayerViewState extends State<MainPlayerView> {
                               ],
                             ),
                           ),
-                        )
-                            .animate()
-                            .fadeIn(duration: 400.ms, delay: 300.ms),
+                        ).animate().fadeIn(duration: 400.ms, delay: 300.ms),
 
                         const SizedBox(height: 20),
 
                         // ── Playback controls ──
                         Obx(
-                          () => Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Shuffle
-                              _controlButton(
-                                icon: Icons.shuffle_rounded,
-                                size: 22,
-                                color: TColor.primaryText35,
-                                onTap: () {},
-                              ),
-                              const SizedBox(width: 16),
-                              // Previous
-                              _controlButton(
-                                icon: Icons.skip_previous_rounded,
-                                size: 36,
-                                color: TColor.primaryText,
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                  playerVM.previousSong();
-                                },
-                              ),
-                              const SizedBox(width: 16),
-                              // Play / Pause (glass circle)
-                              GestureDetector(
-                                onTap: () {
-                                  HapticFeedback.mediumImpact();
-                                  if (playerVM.isPlaying.value) {
-                                    playerVM.pauseSong();
-                                  } else {
-                                    playerVM.resumeSong();
-                                  }
-                                },
-                                child: Container(
-                                  width: 68,
-                                  height: 68,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: TColor.primaryG,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: TColor.focus.withOpacity(0.4),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 6),
-                                      ),
-                                    ],
+                              () => Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Shuffle
+                                  _controlButton(
+                                    icon: Icons.shuffle_rounded,
+                                    size: 22,
+                                    color: TColor.primaryText35,
+                                    onTap: () {},
                                   ),
-                                  child: Icon(
-                                    playerVM.isPlaying.value
-                                        ? Icons.pause_rounded
-                                        : Icons.play_arrow_rounded,
-                                    color: Colors.white,
+                                  const SizedBox(width: 16),
+                                  // Previous
+                                  _controlButton(
+                                    icon: Icons.skip_previous_rounded,
                                     size: 36,
+                                    color: TColor.primaryText,
+                                    onTap: () {
+                                      HapticFeedback.lightImpact();
+                                      playerVM.previousSong();
+                                    },
                                   ),
-                                ),
+                                  const SizedBox(width: 16),
+                                  // Play / Pause (glass circle)
+                                  GestureDetector(
+                                    onTap: () {
+                                      HapticFeedback.mediumImpact();
+                                      if (playerVM.isPlaying.value) {
+                                        playerVM.pauseSong();
+                                      } else {
+                                        playerVM.resumeSong();
+                                      }
+                                    },
+                                    child: Container(
+                                      width: 68,
+                                      height: 68,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: TColor.primaryG,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: TColor.focus.withOpacity(
+                                              0.4,
+                                            ),
+                                            blurRadius: 20,
+                                            offset: const Offset(0, 6),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Icon(
+                                        playerVM.isPlaying.value
+                                            ? Icons.pause_rounded
+                                            : Icons.play_arrow_rounded,
+                                        color: Colors.white,
+                                        size: 36,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  // Next
+                                  _controlButton(
+                                    icon: Icons.skip_next_rounded,
+                                    size: 36,
+                                    color: TColor.primaryText,
+                                    onTap: () {
+                                      HapticFeedback.lightImpact();
+                                      playerVM.nextSong();
+                                    },
+                                  ),
+                                  const SizedBox(width: 16),
+                                  // Repeat
+                                  _controlButton(
+                                    icon: Icons.repeat_rounded,
+                                    size: 22,
+                                    color: TColor.primaryText35,
+                                    onTap: () {},
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 16),
-                              // Next
-                              _controlButton(
-                                icon: Icons.skip_next_rounded,
-                                size: 36,
-                                color: TColor.primaryText,
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                  playerVM.nextSong();
-                                },
-                              ),
-                              const SizedBox(width: 16),
-                              // Repeat
-                              _controlButton(
-                                icon: Icons.repeat_rounded,
-                                size: 22,
-                                color: TColor.primaryText35,
-                                onTap: () {},
-                              ),
-                            ],
-                          ),
-                        )
+                            )
                             .animate()
                             .fadeIn(duration: 400.ms, delay: 350.ms)
-                            .slideY(begin: 0.08, end: 0, duration: 400.ms, delay: 350.ms, curve: Curves.easeOut),
+                            .slideY(
+                              begin: 0.08,
+                              end: 0,
+                              duration: 400.ms,
+                              delay: 350.ms,
+                              curve: Curves.easeOut,
+                            ),
 
                         const SizedBox(height: 40),
                       ],
