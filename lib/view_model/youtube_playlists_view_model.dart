@@ -97,7 +97,34 @@ class YoutubePlaylistsViewModel extends GetxController {
     }
   }
 
-  Future<List<YoutubeTrack>> tracks(String id) async {
+  Future<List<YoutubeTrack>> tracks(String id, {bool refresh = false}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'youtube_tracks_v1_$id';
+    if (!refresh) {
+      final cached = prefs.getString(key);
+      if (cached != null) {
+        try {
+          final saved = (jsonDecode(cached) as List)
+              .map(
+                (t) =>
+                    YoutubeTrack.fromJson(Map<String, dynamic>.from(t as Map)),
+              )
+              .toList();
+          if (saved.isNotEmpty) return saved;
+        } catch (_) {
+          /* Refresh malformed metadata. */
+        }
+      }
+    }
+    final result = await _fetchTracks(id);
+    await prefs.setString(
+      key,
+      jsonEncode(result.map((t) => t.toJson()).toList()),
+    );
+    return result;
+  }
+
+  Future<List<YoutubeTrack>> _fetchTracks(String id) async {
     final yt = YoutubeExplode();
     try {
       final videos = await yt.playlists

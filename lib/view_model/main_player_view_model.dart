@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../model/youtube_track.dart';
 import 'package:get/get.dart';
@@ -17,74 +19,115 @@ class MainPlayerViewModel extends GetxController {
   int _request = 0;
   final List<StreamSubscription<dynamic>> _subscriptions = [];
 
-  Future<void> playYoutube(List<YoutubeTrack> tracks, int index) async {
+  Future<void> playDownloadedYoutube(
+    List<YoutubeTrack> tracks,
+    int index,
+  ) async {
     if (index < 0 || index >= tracks.length) return;
     final request = ++_request;
-    _youtubeMode = true;
-    _youtubeQueue = List.of(tracks);
-    currentIndex = index;
-    playlist = null;
-    currentPlaylist = [];
-    final track = tracks[index];
-    currentSongTitle.value = track.title;
-    currentSongArtist.value = track.artist;
-    currentSongId.value = 0;
-    youtubeArtwork.value = track.artwork;
-    playbackError.value = '';
     isLoading.value = true;
-    position.value = Duration.zero;
-    duration.value = Duration.zero;
-    final yt = YoutubeExplode();
+    playbackError.value = '';
     try {
+      for (final track in tracks) {
+        if (track.localPath == null || !await File(track.localPath!).exists()) {
+          throw const FileSystemException('Downloaded audio is missing');
+        }
+      }
+      if (request != _request) return;
       await audioPlayer.stop();
       if (request != _request) return;
-      await audioPlayer.setLoopMode(LoopMode.off);
-      final manifest = await yt.videos.streamsClient
-          .getManifest(track.id)
-          .timeout(const Duration(seconds: 30));
+      _youtubeMode = true;
+      _youtubeQueue = List.of(tracks);
+      playlist = null;
+      currentPlaylist = [];
+      currentIndex = index;
+      _showYoutubeTrack(index);
+      position.value = Duration.zero;
+      duration.value = Duration.zero;
+      await audioPlayer.setLoopMode(LoopMode.all);
       if (request != _request) return;
-      final streams = manifest.audioOnly.toList()
-        ..sort(
-          (a, b) => b.bitrate.bitsPerSecond.compareTo(a.bitrate.bitsPerSecond),
-        );
-      if (streams.isEmpty) throw StateError('No audio stream');
-      final stream = streams.firstWhere(
-        (s) => s.container == StreamContainer.mp4,
-        orElse: () => streams.first,
-      );
-      await audioPlayer.setAudioSource(
-        AudioSource.uri(
-          stream.url,
-          tag: MediaItem(
-            id: 'youtube:${track.id}',
-            title: track.title,
-            artist: track.artist,
-            artUri: Uri.parse(track.artwork),
-          ),
-        ),
+      await audioPlayer.setAudioSources(
+        tracks
+            .map(
+              (track) => AudioSource.uri(
+                Uri.file(track.localPath!),
+                tag: MediaItem(
+                  id: 'youtube:${track.id}',
+                  title: track.title,
+                  artist: track.artist,
+                ),
+              ),
+            )
+            .toList(),
+        initialIndex: index,
       );
       if (request != _request) return;
       isLoading.value = false;
       unawaited(
         audioPlayer.play().catchError((Object e) {
-          if (request == _request) _playbackFailed();
+          if (request == _request) _playbackFailed(e);
         }),
       );
-    } catch (_) {
-      if (request == _request) _playbackFailed();
+    } catch (error) {
+      if (request == _request) _playbackFailed(error);
     } finally {
-      yt.close();
       if (request == _request) isLoading.value = false;
     }
   }
 
-  void _playbackFailed() {
-    playbackError.value =
-        'Unable to stream this track. Tap play to retry or choose another track.';
+  Future<void> releaseDownloadedTrack(String id) async {
+    if (!_youtubeMode || !_youtubeQueue.any((t) => t.id == id)) return;
+    final request = ++_request;
+    await audioPlayer.stop();
+    if (request != _request) return;
+    _youtubeQueue = [];
+    _youtubeMode = false;
+    await audioPlayer.clearAudioSources();
+    if (request != _request) return;
+    currentSongTitle.value = '';
+    currentSongArtist.value = '';
+    youtubeArtwork.value = '';
+    isLoading.value = false;
+    playbackError.value = '';
+  }
+
+  void _showYoutubeTrack(int index) {
+    if (index < 0 || index >= _youtubeQueue.length) return;
+    currentIndex = index;
+    final track = _youtubeQueue[index];
+    currentSongTitle.value = track.title;
+    currentSongArtist.value = track.artist;
+    currentSongId.value = 0;
+    youtubeArtwork.value = track.artwork;
+  }
+
+  void _playbackFailed([Object? error]) {
+    // Avoid logging signed stream URLs or request headers.
+    debugPrint(
+      'Audio playback failed: ${error.runtimeType}'
+      '${error is PlayerException ? ' (code ${error.code})' : ''}',
+    );
+    final detail = error.toString().toLowerCase();
+    final message = error is FileSystemException
+        ? 'The downloaded file is missing. Download the track again.'
+        : error is TimeoutException
+        ? 'The audio connection timed out.'
+        : detail.contains('403') || detail.contains('forbidden')
+        ? 'YouTube rejected the audio stream.'
+        : error is VideoUnavailableException ||
+              error is VideoUnplayableException
+        ? 'YouTube is not providing a playable stream for this track.'
+        : 'The audio stream could not be played.';
+    playbackError.value = '$message Tap play to retry or choose another track.';
     isPlaying.value = false;
   }
 
-  final AudioPlayer audioPlayer = AudioPlayer();
+  // Keep HTTP headers consistent with the client that resolved the stream.
+  // Native headers avoid a localhost HTTP proxy on Android/iOS.
+  final AudioPlayer audioPlayer = AudioPlayer(
+    userAgent: YoutubeHttpClient.defaultHeaders['user-agent'],
+    useProxyForRequestHeaders: false,
+  );
   var isPlaying = false.obs;
   var currentSongTitle = "".obs;
   var currentSongArtist = "".obs;
@@ -112,7 +155,10 @@ class MainPlayerViewModel extends GetxController {
     // This allows next/prev buttons on lock screen to update the UI
     _subscriptions.add(
       audioPlayer.currentIndexStream.listen((index) {
-        if (_youtubeMode) return;
+        if (_youtubeMode) {
+          if (index != null) _showYoutubeTrack(index);
+          return;
+        }
         if (index != null && index >= 0 && index < currentPlaylist.length) {
           currentIndex = index;
           final song = currentPlaylist[index];
@@ -130,11 +176,13 @@ class MainPlayerViewModel extends GetxController {
     _subscriptions.add(
       audioPlayer.playerStateStream.listen((state) {
         isPlaying.value = state.playing;
-        if (_youtubeMode &&
-            !isLoading.value &&
-            state.processingState == ProcessingState.completed) {
-          nextSong();
-        }
+      }),
+    );
+
+    _subscriptions.add(
+      audioPlayer.errorStream.listen((error) {
+        // Loading failures are handled by the format fallback loop above.
+        if (!isLoading.value) _playbackFailed(error);
       }),
     );
 
@@ -233,7 +281,7 @@ class MainPlayerViewModel extends GetxController {
     if (_youtubeMode &&
         (playbackError.value.isNotEmpty ||
             audioPlayer.processingState == ProcessingState.idle)) {
-      playYoutube(_youtubeQueue, currentIndex);
+      playDownloadedYoutube(_youtubeQueue, currentIndex);
       return;
     }
     if (isLoading.value) return;
@@ -245,12 +293,6 @@ class MainPlayerViewModel extends GetxController {
   }
 
   void nextSong() {
-    if (_youtubeMode) {
-      if (_youtubeQueue.isNotEmpty) {
-        playYoutube(_youtubeQueue, (currentIndex + 1) % _youtubeQueue.length);
-      }
-      return;
-    }
     if (audioPlayer.hasNext) {
       audioPlayer.seekToNext();
     } else {
@@ -259,12 +301,6 @@ class MainPlayerViewModel extends GetxController {
   }
 
   void previousSong() {
-    if (_youtubeMode) {
-      if (_youtubeQueue.isNotEmpty) {
-        playYoutube(_youtubeQueue, (currentIndex - 1) % _youtubeQueue.length);
-      }
-      return;
-    }
     audioPlayer.seekToPrevious();
   }
 

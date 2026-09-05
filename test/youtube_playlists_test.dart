@@ -5,6 +5,17 @@ import 'package:vibemusica/view_model/youtube_playlists_view_model.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  test('playlist tracks open from cached metadata without network', () async {
+    SharedPreferences.setMockInitialValues({
+      'youtube_tracks_v1_PLoffline': jsonEncode([
+        {'id': 'abcdefghijk', 'title': 'Offline song', 'artist': 'Artist'},
+      ]),
+    });
+    final vm = YoutubePlaylistsViewModel()..onInit();
+    final tracks = await vm.tracks('PLoffline');
+    expect(tracks.single.title, 'Offline song');
+    expect(tracks.single.localPath, isNull);
+  });
   test('saved playlists restore and removal persists', () async {
     SharedPreferences.setMockInitialValues({
       'youtube_playlists_v1': [
