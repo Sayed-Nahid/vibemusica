@@ -74,6 +74,17 @@ class _YoutubePlaylistViewState extends State<YoutubePlaylistView> {
           onPressed: _reload,
           icon: const Icon(Icons.refresh),
         ),
+        IconButton(
+          tooltip: 'Delete playlist',
+          icon: const Icon(Icons.delete_outline),
+          onPressed: () => confirmDeleteYoutubePlaylist(
+            context: context,
+            playlist: widget.playlist,
+            onDeleted: () {
+              if (mounted) Navigator.pop(context);
+            },
+          ),
+        ),
       ],
     ),
     body: FutureBuilder<List<YoutubeTrack>>(
@@ -306,3 +317,61 @@ Future<void> showYoutubePlaylistImport(
     );
   }
 }
+
+Future<void> confirmDeleteYoutubePlaylist({
+  required BuildContext context,
+  required Map<String, String> playlist,
+  VoidCallback? onDeleted,
+}) async {
+  final title = playlist['title'] ?? 'this playlist';
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      backgroundColor: const Color(0xff1f182c),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Colors.white24),
+      ),
+      title: const Text(
+        'Delete Playlist?',
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      ),
+      content: Text(
+        'Are you sure you want to delete "$title"?\n\nThis will remove the playlist and delete all downloaded songs from your device storage.',
+        style: const TextStyle(color: Colors.white70, height: 1.4),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const Text('Cancel', style: TextStyle(color: Colors.white60)),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: const Text(
+            'Delete',
+            style: TextStyle(
+              color: Colors.redAccent,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed == true) {
+    final youtubeVM = Get.find<YoutubePlaylistsViewModel>();
+    await youtubeVM.deletePlaylistAndAllSongs(playlist);
+    onDeleted?.call();
+    Get.snackbar(
+      'Playlist deleted',
+      'Playlist and downloaded songs were removed from device storage.',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xff2a1f3d),
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 3),
+    );
+  }
+}
+

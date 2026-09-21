@@ -1,9 +1,11 @@
+import '../common/youtube_download_service.dart';
 import '../common/youtube_playlist_reader.dart';
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../model/youtube_track.dart';
+import 'main_player_view_model.dart';
 
 class YoutubePlaylistsViewModel extends GetxController {
   static const _key = 'youtube_playlists_v1';
@@ -95,6 +97,46 @@ class YoutubePlaylistsViewModel extends GetxController {
       playlists.insert(index, entry);
       error.value = 'Could not remove playlist. Try again.';
     }
+  }
+
+  Future<void> deletePlaylistAndAllSongs(Map<String, String> entry) async {
+    await ready;
+    final playlistId = entry['id'];
+    if (playlistId != null) {
+      final prefs = await SharedPreferences.getInstance();
+      final key = 'youtube_tracks_v1_$playlistId';
+      final cached = prefs.getString(key);
+      final trackIds = <String>[];
+      if (cached != null) {
+        try {
+          final saved = (jsonDecode(cached) as List)
+              .map(
+                (t) =>
+                    YoutubeTrack.fromJson(Map<String, dynamic>.from(t as Map)),
+              )
+              .toList();
+          trackIds.addAll(saved.map((t) => t.id));
+        } catch (_) {}
+      }
+
+      if (Get.isRegistered<YoutubeDownloadService>()) {
+        final downloadService = Get.find<YoutubeDownloadService>();
+        if (downloadService.busy.value) {
+          downloadService.cancel();
+        }
+        if (Get.isRegistered<MainPlayerViewModel>()) {
+          final player = Get.find<MainPlayerViewModel>();
+          for (final trackId in trackIds) {
+            await player.releaseDownloadedTrack(trackId);
+          }
+        }
+        await downloadService.removeMultiple(trackIds, force: true);
+      }
+
+      await prefs.remove(key);
+    }
+
+    await remove(entry);
   }
 
   Future<List<YoutubeTrack>> tracks(String id, {bool refresh = false}) async {

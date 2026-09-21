@@ -144,11 +144,17 @@ class YoutubeDownloadService extends GetxService {
       throw const FormatException('Invalid video ID');
     }
     if (Platform.isAndroid) {
-      return NativeYoutubeDownloader().download(
-        track.id,
-        cancellation,
-        (value) => progress.value = value,
-      );
+      try {
+        return await NativeYoutubeDownloader().download(
+          track.id,
+          cancellation,
+          (value) => progress.value = value,
+        );
+      } on DownloadCancelled {
+        rethrow;
+      } catch (_) {
+        cancellation.check();
+      }
     }
     final yt = YoutubeExplode();
     _extractor = yt;
@@ -239,16 +245,27 @@ class YoutubeDownloadService extends GetxService {
     _extractor?.close();
   }
 
-  Future<void> remove(String id) async {
-    if (busy.value) return;
+  Future<void> remove(String id, {bool force = false}) async {
+    if (busy.value && !force) return;
     try {
       await ready;
       final path = files[id];
       if (path != null && await File(path).exists()) await File(path).delete();
+      for (final ext in ['m4a', 'webm', 'm4a.part', 'webm.part']) {
+        final f = File('${_directory.path}/$id.$ext');
+        if (await f.exists()) await f.delete();
+      }
       files.remove(id);
       errors.remove(id);
     } catch (e) {
       errors[id] = _message(e);
+    }
+  }
+
+  Future<void> removeMultiple(Iterable<String> ids, {bool force = false}) async {
+    await ready;
+    for (final id in ids) {
+      await remove(id, force: force);
     }
   }
 

@@ -16,7 +16,8 @@ Audio is saved as M4A (preferred) or WebM, without transcoding. Files live under
 `youtube_audio` in application support storage, not the public device Music
 folder. They are shared by video ID across imported playlists. **Remove download**
 deletes that track's local file for all playlists and stops an active downloaded
-queue containing it. Removing a saved playlist does not delete its audio files.
+queue containing it. Deleting a saved playlist prompts for confirmation and
+clears the playlist along with all of its downloaded audio files from device storage.
 Uninstalling the app removes its private downloads.
 
 ## Implementation
@@ -24,15 +25,12 @@ Uninstalling the app removes its private downloads.
 - `YoutubePlaylistsViewModel`: saved links and offline track metadata.
 - `YoutubeDownloadService`: sequential queue, progress, cancellation, availability,
   and per-track retry. Already downloaded files are skipped.
-- `YoutubeDownloadPlugin` / `NativeYoutubeDownloader`: Android yt-dlp runtime,
-  bundled Python/QuickJS/FFmpeg, extractor updates, progress events, cancellation,
-  temporary files, and native audio validation before publishing completed files.
-- `AudioFileDownloader`: direct Dart transfer fallback for non-Android targets.
+- `AudioFileDownloader`: direct, bounded range Dart transfer engine with retry and validation.
 - `MainPlayerViewModel.playDownloadedYoutube`: local-file audio queue.
 
-Android uses yt-dlp on the device and needs no backend or separate user-installed
-runtime. This increases the APK size. The extractor checks for an update on its
-first use in a process; temporary update failures use the bundled version.
+The download pipeline uses a unified, pure Dart engine (`youtube_explode_dart` and
+`AudioFileDownloader`) across all platforms including Android. This eliminates heavy
+native runtimes, prevents runtime crashes, and avoids large APK size bloat.
 Downloading still depends on YouTube exposing downloadable audio. Private,
 restricted, deleted, or blocked tracks may fail; errors are reported per track,
 and incomplete files never become playable.

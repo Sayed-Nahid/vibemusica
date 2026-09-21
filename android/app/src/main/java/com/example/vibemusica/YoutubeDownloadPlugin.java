@@ -66,11 +66,9 @@ public final class YoutubeDownloadPlugin implements FlutterPlugin, MethodChannel
         if (prepared) return;
         YoutubeDL.getInstance().init(context);
         FFmpeg.getInstance().init(context);
-        // Refresh the extractor on first use so the APK is not tied to an old
-        // YouTube parser. A temporary update outage can use the bundled copy.
         try {
             YoutubeDL.getInstance().updateYoutubeDL(context, YoutubeDL.UpdateChannel._STABLE);
-        } catch (Exception error) {
+        } catch (Throwable error) {
             Log.w("VibeDownloads", "Extractor update unavailable; using bundled version.");
         }
         prepared = true;
@@ -122,7 +120,7 @@ public final class YoutubeDownloadPlugin implements FlutterPlugin, MethodChannel
             File destination = new File(root, completed.getName());
             if (!completed.renameTo(destination)) throw new IOException("Cannot save completed audio");
             successPath = destination.getAbsolutePath();
-        } catch (Exception error) {
+        } catch (Throwable error) {
             final boolean wasCancelled = cancelled.get() || error instanceof InterruptedException;
             String detail = String.valueOf(error.getMessage());
             // Never log signed URLs, cookies, or full extractor command output.

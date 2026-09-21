@@ -74,12 +74,15 @@ class _PlaylistsViewState extends State<PlaylistsView> {
                                 () => YoutubePlaylistView(playlist: p),
                               ),
                               trailing: IconButton(
-                                tooltip: 'Remove saved playlist',
+                                tooltip: 'Delete playlist',
                                 icon: const Icon(
                                   Icons.delete_outline,
                                   color: Colors.white70,
                                 ),
-                                onPressed: () => youtubeVM.remove(p),
+                                onPressed: () => confirmDeleteYoutubePlaylist(
+                                  context: context,
+                                  playlist: p,
+                                ),
                               ),
                             ),
                           )

@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.vibemusica"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "29.0.13599879"
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -35,15 +35,16 @@ android {
 
     packaging {
         jniLibs.useLegacyPackaging = true
-        // The runtime archives deliberately use .so names for APK extraction.
         jniLibs.keepDebugSymbols += "**/*.zip.so"
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
