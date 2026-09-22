@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
@@ -9,9 +10,10 @@
     <application
         android:label="vibemusica"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:extractNativeLibs="true">
         <activity
-            android:name="com.ryanheise.audioservice.AudioServiceActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""

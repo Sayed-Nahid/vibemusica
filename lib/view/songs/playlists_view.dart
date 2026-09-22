@@ -1,3 +1,5 @@
+import '../../view_model/youtube_playlists_view_model.dart';
+import 'youtube_playlist_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vibemusica/common_widget/folder_cell.dart';
@@ -18,6 +20,7 @@ class PlaylistsView extends StatefulWidget {
 }
 
 class _PlaylistsViewState extends State<PlaylistsView> {
+  final youtubeVM = Get.put(YoutubePlaylistsViewModel());
   final plVM = Get.put(PlaylistsViewModel());
   final foldersVM = Get.put(FoldersViewModel());
 
@@ -27,7 +30,7 @@ class _PlaylistsViewState extends State<PlaylistsView> {
       backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton(
         backgroundColor: TColor.glassFill,
-        onPressed: () {},
+        onPressed: () => showYoutubePlaylistImport(context, youtubeVM),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Image.asset("assets/img/add.png"),
@@ -38,44 +41,95 @@ class _PlaylistsViewState extends State<PlaylistsView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Obx(() => GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1.4,
-                mainAxisSpacing: 4,
-                crossAxisSpacing: 4,
+            ViewAllSection(
+              title: 'YouTube Playlists',
+              onPressed: () => showYoutubePlaylistImport(context, youtubeVM),
+            ),
+            Obx(
+              () => youtubeVM.playlists.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(
+                        'Tap + to add a YouTube playlist.',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    )
+                  : Column(
+                      children: youtubeVM.playlists
+                          .map(
+                            (p) => ListTile(
+                              leading: const Icon(
+                                Icons.playlist_play,
+                                color: Colors.white,
+                              ),
+                              title: Text(
+                                p['title']!,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              subtitle: const Text(
+                                'YouTube',
+                                style: TextStyle(color: Colors.white54),
+                              ),
+                              onTap: () => Get.to(
+                                () => YoutubePlaylistView(playlist: p),
+                              ),
+                              trailing: IconButton(
+                                tooltip: 'Delete playlist',
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.white70,
+                                ),
+                                onPressed: () => confirmDeleteYoutubePlaylist(
+                                  context: context,
+                                  playlist: p,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+            ),
+
+            Obx(
+              () => GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 8,
+                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 1.4,
+                  mainAxisSpacing: 4,
+                  crossAxisSpacing: 4,
+                ),
+                itemCount: plVM.playlistArr.length,
+                itemBuilder: (context, index) {
+                  var pObj = plVM.playlistArr[index];
+                  return PlaylistSongsCell(
+                    pObj: pObj,
+                    onPressed: () {},
+                    onPressedPlay: () {},
+                  );
+                },
               ),
-              itemCount: plVM.playlistArr.length,
-              itemBuilder: (context, index) {
-                var pObj = plVM.playlistArr[index];
-                return PlaylistSongsCell(
-                  pObj: pObj,
-                  onPressed: () {},
-                  onPressedPlay: () {},
-                );
-              },
-            )),
+            ),
             ViewAllSection(title: "My Playlists", onPressed: () {}),
             SizedBox(
               height: 150,
-              child: Obx(() => ListView.builder(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8),
-                itemCount: plVM.myPlaylistArr.length,
-                itemBuilder: (context, index) {
-                  var pObj = plVM.myPlaylistArr[index];
-                  return MyPlaylistCell(
-                    pObj: pObj,
-                    onPressed: () {},
-                  );
-                },
-              )),
+              child: Obx(
+                () => ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  itemCount: plVM.myPlaylistArr.length,
+                  itemBuilder: (context, index) {
+                    var pObj = plVM.myPlaylistArr[index];
+                    return MyPlaylistCell(pObj: pObj, onPressed: () {});
+                  },
+                ),
+              ),
             ),
 
             // ── Folders Section ──
@@ -95,7 +149,10 @@ class _PlaylistsViewState extends State<PlaylistsView> {
 
               if (foldersVM.folders.isEmpty) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 24,
+                    horizontal: 20,
+                  ),
                   child: Center(
                     child: Text(
                       "No folders found",

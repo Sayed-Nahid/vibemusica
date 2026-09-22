@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.vibemusica"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "29.0.13599879"
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -28,15 +28,30 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64")
+        }
+    }
+
+    packaging {
+        jniLibs.useLegacyPackaging = true
+        jniLibs.keepDebugSymbols += "**/*.zip.so"
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
+}
+
+dependencies {
+    implementation("io.github.junkfood02.youtubedl-android:library:0.18.1")
+    implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
 }
 
 flutter {
